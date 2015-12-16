@@ -7,15 +7,23 @@ const express = require('express'),
       bodyParser = require('body-parser'),
       routes = require('./routes/index'),
       users = require('./routes/users'),
-      mongo = require('mongodb'),
-      monk = require('monk'),
-      app = express();
+//      mongo = require('mongodb'),
+//      monk = require('monk'),
+      app = express(),
+      nj = require('nunjucks');
 
-let db = monk('localhost:27017/frontdesk');
+//let db = monk('localhost:27017/frontdesk');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'html');
+
+
+nj.configure('views', {
+    autoescape: true,
+    express: app,
+    watch: true
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
