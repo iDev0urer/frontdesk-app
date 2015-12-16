@@ -5,36 +5,41 @@ const express = require('express'),
       logger = require('morgan'),
       cookieParser = require('cookie-parser'),
       bodyParser = require('body-parser'),
-      routes = require('./routes/index'),
-      users = require('./routes/users'),
-//      mongo = require('mongodb'),
-//      monk = require('monk'),
+      mongo = require('mongoose'),
       app = express(),
-      nj = require('nunjucks');
+      hbs = require('express-hbs'),
+      pry = require('pryjs');
 
-//let db = monk('localhost:27017/frontdesk');
+global.__config = require('./config/config');
+let db = mongo.connect('localhost:27017/frontdesk');
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'html');
-
-
-nj.configure('views', {
-    autoescape: true,
-    express: app,
-    watch: true
-});
+app.engine('hbs', hbs.express4({
+    partialsDir: __dirname + '/app/views/partials',
+    layoutsDir: __dirname + '/app/views/layouts',
+    defaultLayout: __dirname + '/app/views/layouts/default.hbs',
+    beautify: true
+}));
+app.set('view engine', 'hbs');
+app.set('views', __config.view_dir);
+app.set('view cache', false);
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '/app/public')));
 
-app.use('/', routes);
-app.use('/users', users);
+// Set up our controllers
+// let router = express.Router();
+// app.use(router);
+// controllers
+//     .setDirectory(__config.controller_dir)
+//     .bind(router);
+
+let routes = require(__config.router_path)(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
